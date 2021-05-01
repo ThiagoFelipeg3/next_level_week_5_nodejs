@@ -9,7 +9,6 @@ import './database';
 
 const app = express();
 const pathPublic = path.join(__dirname, '..', 'public');
-console.log(__dirname);
 
 app.use(express.static(pathPublic));
 app.set('views', pathPublic);

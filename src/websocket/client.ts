@@ -1,31 +1,49 @@
 import { io } from '../http';
 import ConnectionService from '../services/ConnectionService';
 import UserService from '../services/UserService';
+import MessageService from '../services/MessageService';
+
+interface IParams {
+    text: string;
+    email: string;
+}
 
 io.on('connect', (socket) => {
     const connectionService = new ConnectionService();
     const userService = new UserService();
+    const messageService = new MessageService();
 
-    socket.on('client_first_access', async (params) => {
+    socket.on('client_first_access', async (params: IParams) => {
         const socket_id = socket.id;
         const { text, email } = params;
 
-        const userExists = await userService.findByEmail(email);
+        let user = await userService.findByEmail(email);
 
-        if (!userExists) {
-            const user = await userService.create(email);
+        if (!user) {
+            user = await userService.create(email);
 
-            await connectionService.create({
+            connectionService.create({
                 socket_id,
                 user_id: user.id
             });
         } else {
-            await connectionService.create({
-                socket_id,
-                user_id: userExists.id
-            });
+
+            const connection = await connectionService.findByUserId(user.id);
+
+            if (!connection) {
+                await connectionService.create({
+                    socket_id,
+                    user_id: user.id
+                });
+            } else {
+                connection.socket_id = socket_id;
+                connectionService.create(connection);
+            }
         }
 
-        console.log(params);
+        messageService.create({
+            text, user_id: user.id
+        })
+
     });
 });

@@ -27,6 +27,12 @@ class ConnectionService {
         await this.connectionRepository.save(connection);
         return connection;
     }
+
+    async findByUserId(user_id: string) {
+        return this.connectionRepository.findOne({
+            user_id,
+        });
+    }
 }
 
 export default ConnectionService;

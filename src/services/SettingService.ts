@@ -35,6 +35,27 @@ class SettingService {
             throw new Error('User already existis!');
         }
     }
+
+    public async findByUserName(username: string) {
+        const setting = await this.settingRepository.findOne({
+            username
+        });
+
+        return setting;
+    }
+
+    public async update(username: string, chat: boolean) {
+        const setting = await this.settingRepository
+        .createQueryBuilder()
+        .update(Setting)
+        .set({ chat })
+        .where('username = :username', {
+            username
+        })
+        .execute();
+
+        return setting;
+    }
 }
 
 export default SettingService
