@@ -20,7 +20,7 @@ class SettingController {
         try {
             const { username } = request.params;
             const settingService = new SettingService();
-            const setting = settingService.findByUserName(username);
+            const setting = await settingService.findByUserName(username);
 
             return response.json(setting);
         } catch (error) {

@@ -16,7 +16,7 @@ class ConnectionService {
         this.connectionRepository = getCustomRepository(ConnectionRepository);
     }
 
-    async create({socket_id, user_id, admin_id, id}: IConnectionCreate) {
+    public async create({socket_id, user_id, admin_id, id}: IConnectionCreate) {
         const connection = this.connectionRepository.create({
             socket_id,
             user_id,
@@ -28,10 +28,46 @@ class ConnectionService {
         return connection;
     }
 
-    async findByUserId(user_id: string) {
+    public async findByUserId(user_id: string) {
         return this.connectionRepository.findOne({
             user_id,
         });
+    }
+
+    public async findAllWithoutAdmin() {
+        return this.connectionRepository.find({
+          where: { admin_id: null },
+          relations: ["user"],
+        });
+    }
+
+    public async findBySocketID(socket_id: string) {
+        const connection = await this.connectionRepository.findOne({
+          socket_id,
+        });
+
+        return connection;
+    }
+
+    public async updateAdminID(user_id: string, admin_id: string) {
+        await this.connectionRepository
+        .createQueryBuilder()
+        .update(Connection)
+        .set({ admin_id })
+        .where("user_id = :user_id", {
+        user_id,
+        })
+        .execute();
+    }
+
+    public async deleteBySocketId(socket_id: string) {
+        await this.connectionRepository
+        .createQueryBuilder()
+        .delete()
+        .where("socket_id = :socket_id", {
+        socket_id,
+        })
+        .execute();
     }
 }
 
